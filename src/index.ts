@@ -84,11 +84,12 @@ export type GameProperties = {
 // 'secondTeamClues' | 
 // 'gameOver' 
 
-const setGameProperties = (updatedProperties: GameProperties, gameProperties: GameProperties) => {
+const setGameProperties = (updatedProperties: GameProperties) => {
     let updatedGameProperties: GameProperties = { ...gameProperties };
     for (const [key, value] of Object.entries(updatedProperties)) {
         updatedGameProperties[key] = value; // TODO: fix compilation error
     }
+    gameProperties = updatedGameProperties;
     return updatedGameProperties
 }
 
@@ -118,19 +119,20 @@ socketIO.on('connection', (socket: Socket) => {
         users.push(user);
         socketIO.emit('newUserResponse', users);
     });
-    socket.on('gameStart', (data) => {
+    socket.on('gameStart', (data: GameProperties) => {
         if(users.length > 1){
             socketIO.emit('updateGamePropertiesResponse', gameProperties );
         }
         else{
-            socketIO.emit('updateGamePropertiesResponse', setGameProperties(data, gameProperties));
+            socketIO.emit('updateGamePropertiesResponse', setGameProperties(data));
         }
     });
-    socket.on('updateGameProperties', (data) => {
-        socketIO.emit('updateGamePropertiesResponse', setGameProperties(data, gameProperties));
+    socket.on('updateGameProperties', (data: GameProperties) => {
+        const updatedGameProperties = setGameProperties(data)
+        socketIO.emit('updateGamePropertiesResponse', updatedGameProperties);
     });
     socket.on('showClues', () => {
-        socketIO.emit('updateGamePropertiesResponse', setGameProperties({codeMasterView: !gameProperties.codeMasterView}, gameProperties));
+        socketIO.emit('updateGamePropertiesResponse', setGameProperties({codeMasterView: !gameProperties.codeMasterView}));
     });
     socket.on("join_room", (data) => {
         socket.join(data);
