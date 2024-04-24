@@ -59,7 +59,6 @@ export type GameProperties = {
     firstTeam?: team;
     secondTeam?: team;
     codeMasterView?: boolean;
-    guessPhase?: boolean;
     guessesRemaining?: number;
     allDisable?: boolean;
     firstTeamScore?: number;
@@ -68,30 +67,37 @@ export type GameProperties = {
     secondTeamClues?: clueObj [];
     gameOver?: boolean;
 };
-// type GamePropertiesKeys = 'gameArray' | 'firstTeamWords' |  'secondTeamWords' |
-// 'civilianWords' |
-// 'assassinWord'|
-// 'turn' |
-// 'firstTeam' |
-// 'secondTeam' |
-// 'codeMasterView' |
-// 'guessPhase' |
-// 'guessesRemaining' |
-// 'allDisable' |
-// 'firstTeamScore' |
-// 'secondTeamScore' |
-// 'firstTeamClues' |
-// 'secondTeamClues' | 
-// 'gameOver' 
+type GamePropertiesKey = 'gameArray' | 'firstTeamWords' |  'secondTeamWords' |
+'civilianWords' |
+'assassinWord'|
+'turn' |
+'firstTeam' |
+'secondTeam' |
+'codeMasterView' |
+'guessesRemaining' |
+'allDisable' |
+'firstTeamScore' |
+'secondTeamScore' |
+'firstTeamClues' |
+'secondTeamClues' | 
+'gameOver' 
 
+type message = {
+    text: string;
+    name: string;
+    id: string;
+    socketID: string | undefined;
+    roomId: number;
+}
 const setGameProperties = (updatedProperties: GameProperties) => {
     let updatedGameProperties: GameProperties = { ...gameProperties };
     for (const [key, value] of Object.entries(updatedProperties)) {
-        updatedGameProperties[key] = value; // TODO: fix compilation error
+        (updatedGameProperties[key as GamePropertiesKey] as GameProperties)= value as GameProperties; // TODO: fix compilation error
     }
     gameProperties = updatedGameProperties;
     return updatedGameProperties
 }
+
 
 const socketIO = require('socket.io')(http, {
     cors: {
@@ -102,8 +108,8 @@ let users: User[] = [];
 let gameProperties: GameProperties = {}
 socketIO.on('connection', (socket: Socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);  
-    socket.on('message', (data) => {
-        socketIO.emit('messageResponse', data);
+    socket.on('message', (message: message) => {
+        socketIO.emit('messageResponse', message);
     });
 
     socket.on('disconnect', () => {
@@ -113,11 +119,11 @@ socketIO.on('connection', (socket: Socket) => {
         })
         
         users = users.filter(user => user.socketID !== socket.id);
-        socketIO.emit('newUserResponse', users);
+        socketIO.emit('updatingUsersResponse', users);
     });
     socket.on('newUser', (user: User) => {
         users.push(user);
-        socketIO.emit('newUserResponse', users);
+        socketIO.emit('updatingUsersResponse', users);
     });
     socket.on('gameStart', (data: GameProperties) => {
         if(users.length > 1){
@@ -127,15 +133,15 @@ socketIO.on('connection', (socket: Socket) => {
             socketIO.emit('updateGamePropertiesResponse', setGameProperties(data));
         }
     });
-    socket.on('updateGameProperties', (data: GameProperties) => {
-        const updatedGameProperties = setGameProperties(data)
+    socket.on('updateGameProperties', (gameProperties: GameProperties) => {
+        const updatedGameProperties = setGameProperties(gameProperties)
         socketIO.emit('updateGamePropertiesResponse', updatedGameProperties);
     });
     socket.on('showClues', () => {
         socketIO.emit('updateGamePropertiesResponse', setGameProperties({codeMasterView: !gameProperties.codeMasterView}));
     });
-    socket.on("join_room", (data) => {
-        socket.join(data);
+    socket.on("join_room", (chatRoomId: string) => {
+        socket.join(chatRoomId);
     });
 });
 
