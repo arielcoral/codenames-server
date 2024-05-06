@@ -52,6 +52,7 @@ export type GameProperties = {
    // [key: string]: any;
     gameArray?: cardData[][];
     firstTeamWords?: string[];
+    firstTeamUnguessedWords?: string[];
     secondTeamWords?: string[];
     civilianWords?: string[];
     assassinWord?: string [];
@@ -66,23 +67,9 @@ export type GameProperties = {
     secondTeamScore?: number;
     firstTeamClues?: clueObj [];
     secondTeamClues?: clueObj [];
+    secondTeamUnguessedWords?: string[];
     gameOver?: boolean;
 };
-// type GamePropertiesKeys = 'gameArray' | 'firstTeamWords' |  'secondTeamWords' |
-// 'civilianWords' |
-// 'assassinWord'|
-// 'turn' |
-// 'firstTeam' |
-// 'secondTeam' |
-// 'codeMasterView' |
-// 'guessPhase' |
-// 'guessesRemaining' |
-// 'allDisable' |
-// 'firstTeamScore' |
-// 'secondTeamScore' |
-// 'firstTeamClues' |
-// 'secondTeamClues' | 
-// 'gameOver' 
 
 const setGameProperties = (updatedProperties: GameProperties) => {
     let updatedGameProperties: GameProperties = { ...gameProperties };
@@ -102,9 +89,6 @@ let users: User[] = [];
 let gameProperties: GameProperties = {}
 socketIO.on('connection', (socket: Socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);  
-    socket.on('message', (data) => {
-        socketIO.emit('messageResponse', data);
-    });
 
     socket.on('disconnect', () => {
         console.log('🔥: A user disconnected');
