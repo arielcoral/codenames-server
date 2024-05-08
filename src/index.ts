@@ -18,6 +18,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import { Server, Socket } from "socket.io";
+import { GameProperties, GamePropertiesKey, User } from "./utils/types";
 
 const app = express();
 app.use(express.json());
@@ -34,49 +35,6 @@ const http = require('http').Server(app);
 //         .catch(err => res.json(err))
 // });
 
-type User = {
-    username: string;
-    socketID: string;
-}
-type clueObj = {
-    clue: string;
-    num: number;
-}
-type team = "red" | "blue" | "assassin" | "civilian"
-type cardData = {
-    word: string;
-    team: team;
-    clicked: boolean;
-}
-export type GameProperties = {
-   // [key: string]: any;
-    gameArray?: cardData[][];
-    firstTeamWords?: string[];
-    firstTeamUnguessedWords?: string[];
-    secondTeamWords?: string[];
-    civilianWords?: string[];
-    assassinWord?: string [];
-    turn?: team;
-    firstTeam?: team;
-    secondTeam?: team;
-    codeMasterView?: boolean;
-    guessesRemaining?: number;
-    allDisable?: boolean;
-    firstTeamScore?: number;
-    secondTeamScore?: number;
-    firstTeamClues?: clueObj [];
-    secondTeamClues?: clueObj [];
-    secondTeamUnguessedWords?: string[];
-    gameOver?: boolean;
-};
-
-type message = {
-    text: string;
-    name: string;
-    id: string;
-    socketID: string | undefined;
-    roomId: number;
-}
 const setGameProperties = (updatedProperties: GameProperties) => {
     let updatedGameProperties: GameProperties = { ...gameProperties };
     for (const [key, value] of Object.entries(updatedProperties)) {
