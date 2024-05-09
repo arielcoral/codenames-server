@@ -59,12 +59,7 @@ socketIO.on('connection', (socket: Socket) => {
         }
     });
     socket.on('gameStart', (data: GameProperties) => {        
-        if(users.length > 0){
-            socketIO.emit('updateGamePropertiesResponse', gameProperties );
-        }
-        else{
-            socketIO.emit('updateGamePropertiesResponse', setGameProperties(data));
-        }
+        socketIO.emit('updateGamePropertiesResponse', setGameProperties(data));
     });
     socket.on('updateGameProperties', (gameProperties: GameProperties) => {
         const updatedGameProperties = setGameProperties(gameProperties)
