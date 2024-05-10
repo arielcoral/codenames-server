@@ -5,7 +5,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import { Server, Socket } from "socket.io";
-import { GameProperties, GamePropertiesKey, User } from "./utils/types";
+import { GameProperties, GamePropertiesKey , Parts, User, role, team } from "./utils/types";
 
 const app = express();
 app.use(express.json());
@@ -25,12 +25,11 @@ const http = require('http').Server(app);
 const setGameProperties = (updatedProperties: GameProperties) => {
     let updatedGameProperties: GameProperties = { ...gameProperties };
     for (const [key, value] of Object.entries(updatedProperties)) {
-        (updatedGameProperties[key as GamePropertiesKey] as GameProperties)= value as GameProperties; // TODO: fix compilation error
+        (updatedGameProperties[key as GamePropertiesKey] as GameProperties)= value as GameProperties; 
     }
     gameProperties = updatedGameProperties;
     return updatedGameProperties
 }
-
 
 const socketIO = require('socket.io')(http, {
     cors: {
@@ -39,6 +38,12 @@ const socketIO = require('socket.io')(http, {
 });
 let users: User[] = [];
 let gameProperties: GameProperties = {}
+let parts = {
+    blueCM: false,
+    redCM: false,
+    blueP: false,
+    redP: false
+}
 socketIO.on('connection', (socket: Socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);  
 
@@ -51,12 +56,14 @@ socketIO.on('connection', (socket: Socket) => {
         users = users.filter(user => user.socketID !== socket.id);
         socketIO.emit('updatingUsersResponse', users);
     });
+    socket.on('fillPart', (updatedParts: Parts) => {
+        parts = updatedParts;
+        socketIO.emit('partsResponse', parts);
+    });
     socket.on('newUser', (user: User) => {
         users.push(user);
         socketIO.emit('updatingUsersResponse', users);
-        if(users.length >=4){
-            socketIO.emit('fullGroupResponse', true);
-        }
+        socketIO.emit('partsResponse', parts);
     });
     socket.on('gameStart', (data: GameProperties) => {        
         socketIO.emit('updateGamePropertiesResponse', setGameProperties(data));
