@@ -14,16 +14,18 @@
 //     console.log("server is running on port 3001")
 // })
 
-import express from "express";
+import express, { NextFunction } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import { Server, Socket } from "socket.io";
 import { GameProperties, GamePropertiesKey, User } from "./utils/types";
-
+import crypto from 'crypto'
 const app = express();
 app.use(express.json());
 app.use(cors());
 const http = require('http').Server(app);
+const randomId = () => crypto.randomBytes(8).toString("hex");
+import { InMemorySessionStore } from "./SessionStore";
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
 // app.post("/signup", (req, res) => {
@@ -52,14 +54,37 @@ const socketIO = require('socket.io')(http, {
 });
 let users: User[] = [];
 let gameProperties: GameProperties = {}
+
+const sessionStore = new InMemorySessionStore();
+socketIO.use((socket: Socket, next: NextFunction) => {
+    const sessionID: string = socket.handshake.auth.sessionID;
+    if (sessionID) {
+        const session = sessionStore.findSession(sessionID);
+        if (session) {
+            socket.sessionID = sessionID;
+            socket.userID = session.userID;
+            socket.username = session.username;
+            return next();
+        }
+    }
+    const username = socket.handshake.auth.username;
+    
+    socket.sessionID = randomId();
+    socket.userID = randomId();
+    socket.username = username;
+    next();
+});
+
 socketIO.on('connection', (socket: Socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);  
+;   
 
+    socket.emit("session", {
+        sessionID: socket.sessionID,
+        userID: socket.userID,
+    });
     socket.on('disconnect', () => {
         console.log('🔥: A user disconnected');
-        users.forEach(user => {
-            console.log(user.socketID, socket.id)
-        })
         
         users = users.filter(user => user.socketID !== socket.id);
         socketIO.emit('updatingUsersResponse', users);
