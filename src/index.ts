@@ -63,22 +63,30 @@ socketIO.use((socket: Socket, next: NextFunction) => {
         if (session) {
             socket.sessionID = sessionID;
             socket.userID = session.userID;
-            socket.username = session.username;
+            socket.userName = session.userName; // undifined for now TODO: fix it
             return next();
         }
     }
-    const username = socket.handshake.auth.username;
-    
+    const username = socket.handshake.auth.userName
+    if (!username) {
+        return next(new Error("invalid username"));
+    }
+
     socket.sessionID = randomId();
     socket.userID = randomId();
-    socket.username = username;
+    socket.userName = username;
     next();
 });
 
 socketIO.on('connection', (socket: Socket) => {
-    console.log(`⚡: ${socket.id} user just connected!`);  
-;   
+    console.log(`⚡: ${socket.id} user just connected!`);   
+   // console.log(`⚡: ${socket.auth} username`);      
 
+    sessionStore.saveSession(socket.sessionID, {
+        userID: socket.userID,
+       // username: socket.username,
+        connected: true,
+    });
     socket.emit("session", {
         sessionID: socket.sessionID,
         userID: socket.userID,
@@ -91,6 +99,7 @@ socketIO.on('connection', (socket: Socket) => {
     });
     socket.on('newUser', (user: User) => {
         users.push(user);
+        console.log("@@ users", users.length)
         socketIO.emit('updatingUsersResponse', users);
     });
     socket.on('gameStart', (data: GameProperties) => {

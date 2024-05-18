@@ -11,12 +11,12 @@ export class InMemorySessionStore extends SessionStore {
         this.sessions = new Map();
     }
 
-    findSession(id) {
-        return this.sessions.get(id);
+    findSession(sessionID: string) {
+        return this.sessions.get(sessionID);
     }
 
-    saveSession(id, session) {
-        this.sessions.set(id, session);
+    saveSession(sessionID: string, session) {
+        this.sessions.set(sessionID, session);
     }
 
     findAllSessions() {
