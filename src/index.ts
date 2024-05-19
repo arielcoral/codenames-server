@@ -18,7 +18,7 @@ import express, { NextFunction } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import { Server, Socket } from "socket.io";
-import { GameProperties, GamePropertiesKey, User } from "./utils/types";
+import { GameProperties, GamePropertiesKey, SessionSocket, User } from "./utils/types";
 import crypto from 'crypto'
 const app = express();
 app.use(express.json());
@@ -56,7 +56,7 @@ let users: User[] = [];
 let gameProperties: GameProperties = {}
 
 const sessionStore = new InMemorySessionStore();
-socketIO.use((socket: Socket, next: NextFunction) => {
+socketIO.use((socket: SessionSocket, next: NextFunction) => {
     const sessionID: string = socket.handshake.auth.sessionID;
     if (sessionID) {
         const session = sessionStore.findSession(sessionID);
@@ -78,13 +78,13 @@ socketIO.use((socket: Socket, next: NextFunction) => {
     next();
 });
 
-socketIO.on('connection', (socket: Socket) => {
+socketIO.on('connection', (socket: SessionSocket) => {
     console.log(`⚡: ${socket.id} user just connected!`);   
    // console.log(`⚡: ${socket.auth} username`);      
 
-    sessionStore.saveSession(socket.sessionID, {
-        userID: socket.userID,
-       // username: socket.username,
+    sessionStore.saveSession(socket.sessionID as string, {
+        userID: socket.userID as string,
+        username: socket.userName as string,
         connected: true,
     });
     socket.emit("session", {

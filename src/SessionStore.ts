@@ -1,6 +1,8 @@
+import { sessionObj } from "./utils/types";
+
 /* abstract */ class SessionStore {
-    findSession(id) {}
-    saveSession(id, session) {}
+    findSession(sessionID: string) {}
+    saveSession(sessionID: string, session: sessionObj) {}
     findAllSessions() {}
 }
 
@@ -15,7 +17,7 @@ export class InMemorySessionStore extends SessionStore {
         return this.sessions.get(sessionID);
     }
 
-    saveSession(sessionID: string, session) {
+    saveSession(sessionID: string, session: sessionObj) {
         this.sessions.set(sessionID, session);
     }
 
