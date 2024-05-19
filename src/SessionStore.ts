@@ -7,7 +7,7 @@ import { sessionObj } from "./utils/types";
 }
 
 export class InMemorySessionStore extends SessionStore {
-    sessions: Map<any, any>;
+    sessions: Map<string, sessionObj>;
     constructor() {
         super();
         this.sessions = new Map();

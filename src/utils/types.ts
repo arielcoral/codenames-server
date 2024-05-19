@@ -54,6 +54,6 @@ export interface SessionSocket extends Socket {
 
 export type sessionObj = {
     userID: string,
-    username: string,
+    userName: string,
     connected: boolean,
 }

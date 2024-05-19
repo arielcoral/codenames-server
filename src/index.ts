@@ -17,7 +17,6 @@
 import express, { NextFunction } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import { Server, Socket } from "socket.io";
 import { GameProperties, GamePropertiesKey, SessionSocket, User } from "./utils/types";
 import crypto from 'crypto'
 const app = express();
@@ -38,7 +37,7 @@ import { InMemorySessionStore } from "./SessionStore";
 // });
 
 const setGameProperties = (updatedProperties: GameProperties) => {
-    let updatedGameProperties: GameProperties = { ...gameProperties };
+    const updatedGameProperties: GameProperties = { ...gameProperties };
     for (const [key, value] of Object.entries(updatedProperties)) {
         (updatedGameProperties[key as GamePropertiesKey] as GameProperties)= value as GameProperties; // TODO: fix compilation error
     }
@@ -84,7 +83,7 @@ socketIO.on('connection', (socket: SessionSocket) => {
 
     sessionStore.saveSession(socket.sessionID as string, {
         userID: socket.userID as string,
-        username: socket.userName as string,
+        userName: socket.userName as string,
         connected: true,
     });
     socket.emit("session", {
