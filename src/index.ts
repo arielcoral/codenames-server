@@ -1,30 +1,13 @@
-// import express from "express";
-// import mongoose from "mongoose";
-// import cors from "cors";
-
-// const app = express();
-// app.use(express.json());
-// app.use(cors());
-
-// mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
-// // mongoose.connect("mongodb://127.0.0.1:27017/codenanes")
-
-
-// app.listen(3001, () => {
-//     console.log("server is running on port 3001")
-// })
-
 import express, { NextFunction } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import { GameProperties, GamePropertiesKey, SessionSocket, User } from "./utils/types";
-import crypto from 'crypto'
 const app = express();
 app.use(express.json());
 app.use(cors());
 const http = require('http').Server(app);
-const randomId = () => crypto.randomBytes(8).toString("hex");
 import { InMemorySessionStore } from "./SessionStore";
+import { randomId } from "./utils/sdk";
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
 // app.post("/signup", (req, res) => {
@@ -79,7 +62,6 @@ socketIO.use((socket: SessionSocket, next: NextFunction) => {
 
 socketIO.on('connection', (socket: SessionSocket) => {
     console.log(`⚡: ${socket.id} user just connected!`);   
-   // console.log(`⚡: ${socket.auth} username`);      
 
     sessionStore.saveSession(socket.sessionID as string, {
         userID: socket.userID as string,
@@ -98,7 +80,6 @@ socketIO.on('connection', (socket: SessionSocket) => {
     });
     socket.on('newUser', (user: User) => {
         users.push(user);
-        console.log("@@ users", users.length)
         socketIO.emit('updatingUsersResponse', users);
     });
     socket.on('gameStart', (data: GameProperties) => {
