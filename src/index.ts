@@ -1,16 +1,13 @@
-
-// // mongoose.connect("mongodb://127.0.0.1:27017/codenanes")
-
-import express from "express";
+import express, { NextFunction } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import { Server, Socket } from "socket.io";
-import { GameProperties, GamePropertiesKey , Parts, User, role, team } from "./utils/types";
-
+import { GameProperties, GamePropertiesKey , Parts, SessionSocket, User, role, team } from "./utils/types";
 const app = express();
 app.use(express.json());
 app.use(cors());
 const http = require('http').Server(app);
+import { InMemorySessionStore } from "./SessionStore";
+import { randomId } from "./utils/sdk";
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
 // app.post("/signup", (req, res) => {
@@ -23,7 +20,7 @@ const http = require('http').Server(app);
 // });
 
 const setGameProperties = (updatedProperties: GameProperties) => {
-    let updatedGameProperties: GameProperties = { ...gameProperties };
+    const updatedGameProperties: GameProperties = { ...gameProperties };
     for (const [key, value] of Object.entries(updatedProperties)) {
         (updatedGameProperties[key as GamePropertiesKey] as GameProperties)= value as GameProperties; 
     }
@@ -44,14 +41,44 @@ let parts = {
     blueP: false,
     redP: false
 }
-socketIO.on('connection', (socket: Socket) => {
-    console.log(`⚡: ${socket.id} user just connected!`);  
 
+const sessionStore = new InMemorySessionStore();
+socketIO.use((socket: SessionSocket, next: NextFunction) => {
+    const sessionID: string = socket.handshake.auth.sessionID;
+    if (sessionID) {
+        const session = sessionStore.findSession(sessionID);
+        if (session) {
+            socket.sessionID = sessionID;
+            socket.userID = session.userID;
+            socket.userName = session.userName; // undifined for now TODO: fix it
+            return next();
+        }
+    }
+    const username = socket.handshake.auth.userName
+    if (!username) {
+        return next(new Error("invalid username"));
+    }
+
+    socket.sessionID = randomId();
+    socket.userID = randomId();
+    socket.userName = username;
+    next();
+});
+
+socketIO.on('connection', (socket: SessionSocket) => {
+    console.log(`⚡: ${socket.id} user just connected!`);   
+
+    sessionStore.saveSession(socket.sessionID as string, {
+        userID: socket.userID as string,
+        userName: socket.userName as string,
+        connected: true,
+    });
+    socket.emit("session", {
+        sessionID: socket.sessionID,
+        userID: socket.userID,
+    });
     socket.on('disconnect', () => {
         console.log('🔥: A user disconnected');
-        users.forEach(user => {
-            console.log(user.socketID, socket.id)
-        })
         
         users = users.filter(user => user.socketID !== socket.id);
         socketIO.emit('updatingUsersResponse', users);

@@ -1,3 +1,5 @@
+import { Socket } from "socket.io";
+
 export type User = {
     username: string;
     socketID: string;
@@ -43,6 +45,18 @@ export type message = {
 }
 
 export type GamePropertiesKey = keyof GameProperties;
+
+export interface SessionSocket extends Socket {
+    userID? : string
+    userName?: string
+    sessionID?: string
+}
+
+export type sessionObj = {
+    userID: string,
+    userName: string,
+    connected: boolean,
+}
 
 export type Part = 'redP' | 'blueP' | 'redCM' | 'blueCM'
 export type Parts = {
