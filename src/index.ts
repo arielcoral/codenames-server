@@ -63,7 +63,7 @@ socketIO.on('connection', (socket: Socket) => {
     socket.on('newUser', (user: User) => {
         users.push(user);
         socketIO.emit('updatingUsersResponse', users);
-        socketIO.emit('partsResponse', parts);
+        socketIO.emit('partsResponse', parts); // to see the avilable parts in the waiting room (after a user enters the game)
     });
     socket.on('gameStart', (data: GameProperties) => {        
         socketIO.emit('updateGamePropertiesResponse', setGameProperties(data));
