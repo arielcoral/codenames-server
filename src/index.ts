@@ -1,7 +1,7 @@
 import express, { NextFunction } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import { GameProperties, GamePropertiesKey, SessionSocket, User } from "./utils/types";
+import { GameProperties, GamePropertiesKey , Parts, SessionSocket, User, role, team } from "./utils/types";
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -22,12 +22,11 @@ import { randomId } from "./utils/sdk";
 const setGameProperties = (updatedProperties: GameProperties) => {
     const updatedGameProperties: GameProperties = { ...gameProperties };
     for (const [key, value] of Object.entries(updatedProperties)) {
-        (updatedGameProperties[key as GamePropertiesKey] as GameProperties)= value as GameProperties; // TODO: fix compilation error
+        (updatedGameProperties[key as GamePropertiesKey] as GameProperties)= value as GameProperties; 
     }
     gameProperties = updatedGameProperties;
     return updatedGameProperties
 }
-
 
 const socketIO = require('socket.io')(http, {
     cors: {
@@ -36,6 +35,12 @@ const socketIO = require('socket.io')(http, {
 });
 let users: User[] = [];
 let gameProperties: GameProperties = {}
+let parts = {
+    blueCM: false,
+    redCM: false,
+    blueP: false,
+    redP: false
+}
 
 const sessionStore = new InMemorySessionStore();
 socketIO.use((socket: SessionSocket, next: NextFunction) => {
@@ -78,17 +83,17 @@ socketIO.on('connection', (socket: SessionSocket) => {
         users = users.filter(user => user.socketID !== socket.id);
         socketIO.emit('updatingUsersResponse', users);
     });
+    socket.on('fillPart', (updatedParts: Parts) => {
+        parts = updatedParts;
+        socketIO.emit('partsResponse', parts);
+    });
     socket.on('newUser', (user: User) => {
         users.push(user);
         socketIO.emit('updatingUsersResponse', users);
+        socketIO.emit('partsResponse', parts); // to see the avilable parts in the waiting room (after a user enters the game)
     });
-    socket.on('gameStart', (data: GameProperties) => {
-        if(users.length > 1){
-            socketIO.emit('updateGamePropertiesResponse', gameProperties );
-        }
-        else{
-            socketIO.emit('updateGamePropertiesResponse', setGameProperties(data));
-        }
+    socket.on('gameStart', (data: GameProperties) => {        
+        socketIO.emit('updateGamePropertiesResponse', setGameProperties(data));
     });
     socket.on('updateGameProperties', (gameProperties: GameProperties) => {
         const updatedGameProperties = setGameProperties(gameProperties)

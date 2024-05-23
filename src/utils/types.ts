@@ -8,6 +8,7 @@ export type clueObj = {
     clue: string;
     num: number;
 }
+export type role = "code-master" | "player"
 export type team = "red" | "blue" | "assassin" | "civilian"
 export type cardData = {
     word: string;
@@ -15,7 +16,6 @@ export type cardData = {
     clicked: boolean;
 }
 export type GameProperties = {
-   // [key: string]: any;
     gameArray?: cardData[][];
     firstTeamWords?: string[];
     firstTeamUnguessedWords?: string[];
@@ -56,4 +56,12 @@ export type sessionObj = {
     userID: string,
     userName: string,
     connected: boolean,
+}
+
+export type Part = 'redP' | 'blueP' | 'redCM' | 'blueCM'
+export type Parts = {
+    redP: boolean,
+    blueP: boolean,
+    redCM: boolean,
+    blueCM: boolean
 }
