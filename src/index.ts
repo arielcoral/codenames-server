@@ -1,13 +1,14 @@
-import express, { NextFunction } from "express";
-import mongoose from "mongoose";
+import express from "express";
 import cors from "cors";
-import { GameProperties, GamePropertiesKey , Parts, SessionSocket, User, role, team } from "./utils/types";
+import { GameProperties, GamePropertiesKey , Parts, SessionSocket, User } from "./utils/types";
 const app = express();
 app.use(express.json());
 app.use(cors());
-const http = require('http').Server(app);
+import { Server as SocketIOServer } from 'socket.io';
+import { createServer } from 'http';
+const http = createServer(app);
 import { InMemorySessionStore } from "./SessionStore";
-import { randomId } from "./utils/sdk";
+import { handlesSession } from "./middlewares/handlesSession";
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
 // app.post("/signup", (req, res) => {
@@ -28,11 +29,12 @@ const setGameProperties = (updatedProperties: GameProperties) => {
     return updatedGameProperties
 }
 
-const socketIO = require('socket.io')(http, {
+const socketIO = new SocketIOServer(http, {
     cors: {
         origin: "http://localhost:5173"
     }
 });
+
 let users: User[] = [];
 let gameProperties: GameProperties = {}
 let parts = {
@@ -43,27 +45,7 @@ let parts = {
 }
 
 const sessionStore = new InMemorySessionStore();
-socketIO.use((socket: SessionSocket, next: NextFunction) => {
-    const sessionID: string = socket.handshake.auth.sessionID;
-    if (sessionID) {
-        const session = sessionStore.findSession(sessionID);
-        if (session) {
-            socket.sessionID = sessionID;
-            socket.userID = session.userID;
-            socket.userName = session.userName; // undifined for now TODO: fix it
-            return next();
-        }
-    }
-    const username = socket.handshake.auth.userName
-    if (!username) {
-        return next(new Error("invalid username"));
-    }
-
-    socket.sessionID = randomId();
-    socket.userID = randomId();
-    socket.userName = username;
-    next();
-});
+socketIO.use(handlesSession(sessionStore));
 
 socketIO.on('connection', (socket: SessionSocket) => {
     console.log(`⚡: ${socket.id} user just connected!`);   
