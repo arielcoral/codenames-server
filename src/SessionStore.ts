@@ -1,9 +1,9 @@
 import { sessionObj } from "./utils/types";
 
-/* abstract */ class SessionStore {
-    findSession(sessionID: string) {}
-    saveSession(sessionID: string, session: sessionObj) {}
-    findAllSessions() {}
+abstract class SessionStore {
+    abstract findSession(sessionID: string): sessionObj | undefined;
+    abstract saveSession(sessionID: string, session: sessionObj): void;
+    abstract findAllSessions(): sessionObj[];
 }
 
 export class InMemorySessionStore extends SessionStore {

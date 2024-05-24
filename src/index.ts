@@ -1,11 +1,12 @@
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import { GameProperties, GamePropertiesKey , Parts, SessionSocket, User } from "./utils/types";
 const app = express();
 app.use(express.json());
 app.use(cors());
-const http = require('http').Server(app);
+import { Server as SocketIOServer } from 'socket.io';
+import { createServer } from 'http';
+const http = createServer(app);
 import { InMemorySessionStore } from "./SessionStore";
 import { handlesSession } from "./middlewares/handlesSession";
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
@@ -28,11 +29,12 @@ const setGameProperties = (updatedProperties: GameProperties) => {
     return updatedGameProperties
 }
 
-const socketIO = require('socket.io')(http, {
+const socketIO = new SocketIOServer(http, {
     cors: {
         origin: "http://localhost:5173"
     }
 });
+
 let users: User[] = [];
 let gameProperties: GameProperties = {}
 let parts = {
