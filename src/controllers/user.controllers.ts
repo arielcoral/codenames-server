@@ -1,9 +1,11 @@
 import { Request, Response} from "express";
-import { SignupModel } from '../../models/signup'
+import { SignupModule } from "../models/signup";
 
 export const createUser = (req: Request, res: Response) => {
-    SignupModel.create(req.body)
+    const {userName, role, team} = req.body
+    SignupModule.create({userName, role, team})
         .then((user) => {
+            console.log("@@ user:", user)
             return res.send(user);
         })
         .catch(err => console.error(err.message))

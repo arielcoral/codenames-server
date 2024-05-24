@@ -9,6 +9,8 @@ import { createServer } from 'http';
 const http = createServer(app);
 import { InMemorySessionStore } from "./SessionStore";
 import { handlesSession } from "./middlewares/handlesSession";
+import indexRouter from "./routes";
+import mongoose from "mongoose";
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
 // app.post("/signup", (req, res) => {
@@ -19,6 +21,18 @@ import { handlesSession } from "./middlewares/handlesSession";
 //         })
 //         .catch(err => res.json(err))
 // });
+mongoose
+.connect('mongodb://localhost:27017/codenames')
+.then(() => {
+    console.log('Successfully connected to MongoDB');
+})
+.catch((error) => {
+    console.error('Error connecting to MongoDB', error.message);
+    process.exit(1);
+});
+
+app.use(indexRouter)
+
 
 const setGameProperties = (updatedProperties: GameProperties) => {
     const updatedGameProperties: GameProperties = { ...gameProperties };
@@ -88,6 +102,8 @@ socketIO.on('connection', (socket: SessionSocket) => {
         socket.join(chatRoomId);
     });
 });
+
+
 
 app.listen(3001, () => {
     console.log("server is running on port 3001")
