@@ -33,6 +33,7 @@ mongoose
 
 app.use(indexRouter)
 
+// ----------------------------------------------------------------------------------------------------------------------------
 
 const setGameProperties = (updatedProperties: GameProperties) => {
     const updatedGameProperties: GameProperties = { ...gameProperties };
@@ -103,11 +104,9 @@ socketIO.on('connection', (socket: SessionSocket) => {
     });
 });
 
-
-
 app.listen(3001, () => {
     console.log("server is running on port 3001")
 })
 http.listen(3002, () => {
-    console.log("http is running on port 3002")
+    console.log("socket is running on port 3002")
 })

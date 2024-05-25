@@ -7,11 +7,11 @@ export interface User extends Document {
     role: role;
     team: team;
 }
-const SignupSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     id: String,
     userName: String,
     role: String,
     team: String
 });
 
-export const SignupModule = mongoose.model<User>('User', SignupSchema);
+export const UserModel = mongoose.model<User>('User', userSchema);
