@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express";
 import express from 'express';
-import registerRouter from "./signup";
+import userRouter from "./user";
 
 const indexRouter: Router = Router();
 
@@ -12,6 +12,7 @@ const logPath = (req: Request, res: Response, next: NextFunction) => { // Middle
 indexRouter.use(express.json())
 indexRouter.use(logPath)
 
-indexRouter.use('/signup', registerRouter)
+indexRouter.use('/user', userRouter)
+
 
 export default indexRouter;
