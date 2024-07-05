@@ -21,7 +21,7 @@ export const handlesSession = (sessionStore: InMemorySessionStore) => {
         }
 
         socket.sessionID = randomId();
-        socket.userID = randomId();
+        //socket.userID = randomId();
         socket.userName = username;
         next();
     };

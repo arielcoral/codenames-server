@@ -1,4 +1,4 @@
-import mongoose, { Document  } from "mongoose";
+import mongoose, { Document, Schema  } from "mongoose";
 import { role, team } from "../utils/types";
 
 export interface User extends Document {
@@ -7,11 +7,30 @@ export interface User extends Document {
     role: role;
     team: team;
 }
-const userSchema = new mongoose.Schema({
-    id: String,
-    userName: String,
-    role: String,
-    team: String
+
+const UserSchema = new Schema<User>({
+    userName: {
+        type: String,
+        required: true,
+        minlength: 1,
+        maxlength: 30,
+        unique: true
+    },
+    role: {
+        type: String,
+        required: true,
+        minlength: 5,
+        maxlength: 11, // eather player or code-master
+        unique: false
+    },
+    team: {
+        type: String,
+        required: false,
+        minlength: 3,
+        maxlength: 4, // eather red or blue
+        unique: false
+    }
 });
 
-export const UserModel = mongoose.model<User>('User', userSchema);
+
+export const UserModel = mongoose.model<User>('User', UserSchema);

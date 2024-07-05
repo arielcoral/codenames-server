@@ -10,11 +10,25 @@ export const createUser = (req: Request, res: Response) => {
         .catch(err => console.error(err.message))
 }
 
-export const getUserById = (req: Request, res: Response) => {
-    const { id } = req.params
-    UserModel.findById(id)
+export const getUserByUserName = (req: Request, res: Response) => {
+    const { userName } = req.params;
+    UserModel.findOne({ userName })
+        .then((user) => {
+            if (!user) {
+                return res.status(200).send({ user: 'User not found' });
+            }
+            res.send({user: user});
+        })
+        .catch((error) => {
+            console.error(error);
+            res.status(500).send({ message: 'An error occurred while fetching the user', error: error.message });
+        });
+};
+export const deleteUser = (req: Request, res: Response) => {
+    const { userName } = req.params
+    UserModel.deleteOne({userName})
     .then((user) => {
-        res.send( user)
+    res.send({data: user})
     })
     .catch((error) => console.log(error));
 }

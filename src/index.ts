@@ -11,6 +11,9 @@ import { InMemorySessionStore } from "./SessionStore";
 import { handlesSession } from "./middlewares/handlesSession";
 import indexRouter from "./routes";
 import mongoose from "mongoose";
+import { REST_API_BASE_URL } from "./utils/constants";
+import axios from "axios";
+import { getHeaders } from "./utils/sdk";
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
 // app.post("/signup", (req, res) => {
@@ -74,9 +77,15 @@ socketIO.on('connection', (socket: SessionSocket) => {
         sessionID: socket.sessionID,
         userID: socket.userID,
     });
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
         console.log('🔥: A user disconnected');
-        
+        try {
+            await axios.delete(`${REST_API_BASE_URL}/user/${socket.userName}`, {
+                headers: getHeaders()
+            });
+        } catch (error) {
+            console.error(error);
+        }
         users = users.filter(user => user.socketID !== socket.id);
         socketIO.emit('updatingUsersResponse', users);
     });
