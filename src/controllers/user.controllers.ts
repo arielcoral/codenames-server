@@ -2,8 +2,8 @@ import { Request, Response} from "express";
 import { UserModel } from "../models/user.model";
 
 export const createUser = (req: Request, res: Response) => {
-    const {userName, role, team} = req.body
-    UserModel.create({userName, role, team})
+    const {userName, socketID, role, team} = req.body
+    UserModel.create({userName, socketID, role, team})
         .then((user) => {
             return res.send({userID: user._id});
         })
@@ -18,6 +18,20 @@ export const getUserByUserName = (req: Request, res: Response) => {
                 return res.status(200).send({ user: 'User not found' });
             }
             res.send({user: user});
+        })
+        .catch((error) => {
+            console.error(error);
+            res.status(500).send({ message: 'An error occurred while fetching the user', error: error.message });
+        });
+};
+
+export const getAllUsers = (req: Request, res: Response) => {
+    UserModel.find({ })
+        .then((users) => {
+            if (!users) {
+                return res.status(200).send({ user: 'User not found' });
+            }
+            res.send( users);
         })
         .catch((error) => {
             console.error(error);
