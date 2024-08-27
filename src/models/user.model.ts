@@ -4,6 +4,7 @@ import { role, team } from "../utils/types";
 export interface User extends Document {
     id: string;
     userName: string;
+    chatRoomID: number;
     role: role;
     team: team;
 }
@@ -15,6 +16,11 @@ const UserSchema = new Schema<User>({
         minlength: 1,
         maxlength: 30,
         unique: true
+    },
+    chatRoomID: {
+        type: Number,
+        required: true,
+        unique: false
     },
     role: {
         type: String,

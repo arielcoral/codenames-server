@@ -2,8 +2,8 @@ import { Request, Response} from "express";
 import { UserModel } from "../models/user.model";
 
 export const createUser = (req: Request, res: Response) => {
-    const {userName, role, team} = req.body
-    UserModel.create({userName, role, team})
+    const {userName, chatRoomID, role, team} = req.body
+    UserModel.create({userName, chatRoomID, role, team})
         .then((user) => {
             return res.send({userID: user._id});
         })
@@ -24,6 +24,21 @@ export const getUserByUserName = (req: Request, res: Response) => {
             res.status(500).send({ message: 'An error occurred while fetching the user', error: error.message });
         });
 };
+export const getUserByChatRoomID = (req: Request, res: Response) => {
+    const { chatRoomID } = req.params;
+    UserModel.find({ chatRoomID })
+        .then((users) => {
+            if (!users) {
+                return res.status(200).send([]);
+            }
+            res.send( users);
+        })
+        .catch((error) => {
+            console.error(error);
+            res.status(500).send({ message: 'An error occurred while fetching the user', error: error.message });
+        });
+};
+
 export const deleteUser = (req: Request, res: Response) => {
     const { userName } = req.params
     UserModel.deleteOne({userName})
