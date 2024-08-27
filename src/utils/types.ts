@@ -4,6 +4,13 @@ export type User = {
     username: string;
     socketID: string;
 }
+export type user = { // TODO tidy up the types and fix naming
+    id: string;
+    userName: string;
+    chatRoomID: number;
+    role: role;
+    team: team;
+}
 export type clueObj = {
     clue: string;
     num: number;

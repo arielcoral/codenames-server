@@ -13,7 +13,7 @@ import indexRouter from "./routes";
 import mongoose from "mongoose";
 import { REST_API_BASE_URL } from "./utils/constants";
 import axios from "axios";
-import { getAllUsers, getHeaders } from "./utils/sdk";
+import { getUserByChatRoomID as getUsersByChatRoomID, getHeaders, getChatRoomIDFromUser } from "./utils/sdk";
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
 // app.post("/signup", (req, res) => {
@@ -79,24 +79,23 @@ socketIO.on('connection', (socket: SessionSocket) => {
     socket.on('disconnect', async () => {
         console.log('🔥: A user disconnected');
         try {
+            const usersInRoom = (await getUsersByChatRoomID(await getChatRoomIDFromUser(socket.userName as string))) as User []
             await axios.delete(`${REST_API_BASE_URL}/user/${socket.userName}`, {
                 headers: getHeaders()
             });
+            socketIO.emit('updatingUsersOnlineResponse', usersInRoom.length - 1);
         } catch (error) {
             console.error(error);
-        }
-        const allUsers = (await getAllUsers()) as User []
-        const users = allUsers.filter(user => user.socketID !== socket.id);
-        socketIO.emit('updatingUsersResponse', users);
+        }  
     });
     socket.on('fillPart', (updatedParts: Parts) => {
         parts = updatedParts;
         socketIO.emit('partsResponse', parts);
     });
-    socket.on('newUser', async (user: User) => {
-        const users = (await getAllUsers()) as User []
+    socket.on('newUser', async (user: User, chatRoomID: number) => {
+        const users = (await getUsersByChatRoomID(chatRoomID)) as User []
         users.push(user);
-        socketIO.emit('updatingUsersResponse', users);
+        socketIO.emit('updatingUsersOnlineResponse', users.length);
         socketIO.emit('partsResponse', parts); // to see the avilable parts in the waiting room (after a user enters the game)
     });
     socket.on('gameStart', (data: GameProperties) => {        
