@@ -13,7 +13,7 @@ import indexRouter from "./routes";
 import mongoose from "mongoose";
 import { REST_API_BASE_URL } from "./utils/constants";
 import axios from "axios";
-import { getUserByChatRoomID as getUsersByChatRoomID, getHeaders, getChatRoomIDFromUser } from "./utils/sdk";
+import { getUsersByChatRoomID, getHeaders, getChatRoomIDFromUser } from "./utils/sdk";
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
 // app.post("/signup", (req, res) => {

@@ -11,6 +11,7 @@ export type user = { // TODO tidy up the types and fix naming
     role: role;
     team: team;
 }
+
 export type clueObj = {
     clue: string;
     num: number;

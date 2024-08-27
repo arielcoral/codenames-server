@@ -10,7 +10,7 @@ export function getHeaders() {
     return headers
 }
 
-export async function getUserByChatRoomID(chatRoomID: number){
+export async function getUsersByChatRoomID(chatRoomID: number){
     const fetchedUsersJson = await fetch(`http://localhost:3001/user/chatRoomID/${chatRoomID}`)
     const fetchedUsers: User []  = (await fetchedUsersJson.json()) as User [] 
     return fetchedUsers
