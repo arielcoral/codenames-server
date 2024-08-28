@@ -1,10 +1,6 @@
 import { Socket } from "socket.io";
 
-export type User = {
-    username: string;
-    socketID: string;
-}
-export type user = { // TODO tidy up the types and fix naming
+export type user = { 
     id: string;
     userName: string;
     chatRoomID: number;
