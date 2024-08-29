@@ -2,18 +2,13 @@ import { Request, Response} from "express";
 import { WorkBankModel } from "../models/wordsBank.model";
 
 export const addWords = (req: Request, res: Response) => {
-    const { words } = req.body; // Assuming req.body.words is an array of words
-
+    const { words } = req.body; 
     if (!Array.isArray(words)) {
         return res.status(400).send({ error: 'Input must be an array of words' });
     }
-
-    // Map the array of words to an array of objects with a 'word' property
     const wordDocuments = words.map(word => ({ word }));
-
     WorkBankModel.insertMany(wordDocuments)
         .then((result) => {
-            // Send back the inserted documents or their IDs
             const insertedIds = result.map(doc => doc._id);
             return res.send({ insertedIds });
         })
@@ -22,3 +17,11 @@ export const addWords = (req: Request, res: Response) => {
             return res.status(500).send({ error: 'An error occurred while adding words' });
         });
 }
+export const getWordsForTheGame = async (req: Request, res: Response) => {
+    const gameWords: string [] = []
+    const result = await WorkBankModel.aggregate().sample(25);
+    result.forEach((obj) => {
+        gameWords.push(obj.word);
+    });
+    res.send(gameWords)
+};
