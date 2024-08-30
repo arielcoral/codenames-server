@@ -91,8 +91,16 @@ socketIO.on('connection', (socket: SessionSocket) => {
         socketIO.emit('updatingUsersOnlineResponse', users.length);
         socketIO.emit('partsResponse', getChosenParts(await getUsersByChatRoomID(chatRoomID))); // to see the avilable parts in the waiting room (after a user enters the game)
     });
-    socket.on('gameStart', (data: GameProperties) => {        
-        socketIO.emit('updateGamePropertiesResponse', setGameProperties(data));
+    socket.on('gameStart', async (gameStartProperties: GameProperties) => {  
+        try {
+            await axios.post(`${REST_API_BASE_URL}/gameProperties`, gameStartProperties, {
+                headers: getHeaders()
+            });
+        } catch (error) {
+            console.error(error);
+            return { response: false, data: null };
+        }      
+        socketIO.emit('updateGamePropertiesResponse', setGameProperties(gameStartProperties));
     });
     socket.on('updateGameProperties', (gameProperties: GameProperties) => {
         const updatedGameProperties = setGameProperties(gameProperties)
