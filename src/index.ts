@@ -14,6 +14,7 @@ import mongoose from "mongoose";
 import { REST_API_BASE_URL } from "./utils/constants";
 import axios from "axios";
 import { getUsersByChatRoomID, getHeaders, getChatRoomIDFromUser, getChosenParts } from "./utils/sdk";
+
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
 // app.post("/signup", (req, res) => {
@@ -38,12 +39,21 @@ app.use(indexRouter)
 
 // ----------------------------------------------------------------------------------------------------------------------------
 
-const setGameProperties = (updatedProperties: GameProperties) => {
-    const updatedGameProperties: GameProperties = { ...gameProperties };
+const setGameProperties = async (updatedProperties: GameProperties) => {
+    console.log('@@ entered setGameProperties',)
+    const gamePropertiesJson = await fetch(`${REST_API_BASE_URL}/gameProperties/${updatedProperties.chatRoomID}`);
+    const gameProperties = await gamePropertiesJson.json() as GameProperties [];
+    const updatedGameProperties: GameProperties = { ...gameProperties[0] };
     for (const [key, value] of Object.entries(updatedProperties)) {
         (updatedGameProperties[key as GamePropertiesKey] as GameProperties)= value as GameProperties; 
     }
-    gameProperties = updatedGameProperties;
+    try{
+        console.log('@@ entered try',);
+        axios.patch(`${REST_API_BASE_URL}/gameProperties`, getHeaders())
+    }
+    catch(error){
+        console.error(error);
+    }
     return updatedGameProperties
 }
 
@@ -53,7 +63,7 @@ const socketIO = new SocketIOServer(http, {
     }
 });
 
-let gameProperties: GameProperties = {}
+ //let gameProperties: GameProperties = {}
 
 const sessionStore = new InMemorySessionStore();
 socketIO.use(handlesSession(sessionStore));
@@ -92,23 +102,29 @@ socketIO.on('connection', (socket: SessionSocket) => {
         socketIO.emit('partsResponse', getChosenParts(await getUsersByChatRoomID(chatRoomID))); // to see the avilable parts in the waiting room (after a user enters the game)
     });
     socket.on('gameStart', async (gameStartProperties: GameProperties) => {  
-        try {
-            await axios.post(`${REST_API_BASE_URL}/gameProperties`, gameStartProperties, {
-                headers: getHeaders()
-            });
-        } catch (error) {
-            console.error(error);
-            return { response: false, data: null };
-        }      
-        socketIO.emit('updateGamePropertiesResponse', setGameProperties(gameStartProperties));
+        const isItFreeToCreateBoardJson = await fetch(`${REST_API_BASE_URL}/gameProperties/${gameStartProperties.chatRoomID}`);
+        const isItFreeToCreateBoard = await isItFreeToCreateBoardJson.json() as GameProperties [];
+        if (isItFreeToCreateBoard.length === 0){
+            try {
+                await axios.post(`${REST_API_BASE_URL}/gameProperties`, gameStartProperties, {
+                    headers: getHeaders()
+                });
+                const gameProperties = await setGameProperties(gameStartProperties)
+                socketIO.emit('updateGamePropertiesResponse', gameProperties);
+            } catch (error) {
+                console.error(error);
+                return { response: false, data: null };
+            }  
+        }
     });
-    socket.on('updateGameProperties', (gameProperties: GameProperties) => {
-        const updatedGameProperties = setGameProperties(gameProperties)
+    socket.on('updateGameProperties', async (gameProperties: GameProperties) => {
+        console.log('@@ updateGameProperties emit');
+        const updatedGameProperties = await setGameProperties(gameProperties)
         socketIO.emit('updateGamePropertiesResponse', updatedGameProperties);
     });
-    socket.on('showClues', () => {
-        socketIO.emit('updateGamePropertiesResponse', setGameProperties({codeMasterView: !gameProperties.codeMasterView}));
-    });
+    // socket.on('showClues', (codeMasterView: boolean, chatRoomID: number) => {
+    //     socketIO.emit('updateGamePropertiesResponse', setGameProperties({codeMasterView: codeMasterView}, chatRoomID));
+    // });
     socket.on("join_room", (chatRoomId: string) => {
         socket.join(chatRoomId);
     });
