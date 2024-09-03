@@ -20,6 +20,7 @@ export type cardData = {
     clicked: boolean;
 }
 export type GameProperties = {
+    chatRoomID?: number;
     gameArray?: cardData[][];
     firstTeamWords?: string[];
     firstTeamUnguessedWords?: string[];

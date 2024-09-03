@@ -14,6 +14,7 @@ import mongoose from "mongoose";
 import { REST_API_BASE_URL } from "./utils/constants";
 import axios from "axios";
 import { getUsersByChatRoomID, getHeaders, getChatRoomIDFromUser, getChosenParts } from "./utils/sdk";
+
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
 // app.post("/signup", (req, res) => {
@@ -38,12 +39,19 @@ app.use(indexRouter)
 
 // ----------------------------------------------------------------------------------------------------------------------------
 
-const setGameProperties = (updatedProperties: GameProperties) => {
-    const updatedGameProperties: GameProperties = { ...gameProperties };
+const setGameProperties = async (updatedProperties: GameProperties) => {
+    const gamePropertiesJson = await fetch(`${REST_API_BASE_URL}/gameProperties/${updatedProperties.chatRoomID}`);
+    const gameProperties = await gamePropertiesJson.json() as GameProperties [];
+    const updatedGameProperties: GameProperties = { ...gameProperties[0] };
     for (const [key, value] of Object.entries(updatedProperties)) {
         (updatedGameProperties[key as GamePropertiesKey] as GameProperties)= value as GameProperties; 
     }
-    gameProperties = updatedGameProperties;
+    try{
+        axios.patch(`${REST_API_BASE_URL}/gameProperties`, updatedGameProperties)
+    }
+    catch(error){
+        console.error(error);
+    }
     return updatedGameProperties
 }
 
@@ -53,7 +61,6 @@ const socketIO = new SocketIOServer(http, {
     }
 });
 
-let gameProperties: GameProperties = {}
 
 const sessionStore = new InMemorySessionStore();
 socketIO.use(handlesSession(sessionStore));
@@ -73,10 +80,17 @@ socketIO.on('connection', (socket: SessionSocket) => {
     socket.on('disconnect', async () => {
         console.log('🔥: A user disconnected');
         try {
-            const usersInRoom = (await getUsersByChatRoomID(await getChatRoomIDFromUser(socket.userName as string))) as user []
+            const currentChatRoomID = await getChatRoomIDFromUser(socket.userName as string)
+            const usersInRoom = (await getUsersByChatRoomID(currentChatRoomID)) as user []
             await axios.delete(`${REST_API_BASE_URL}/user/${socket.userName}`, {
                 headers: getHeaders()
             });
+            if(usersInRoom.length - 1 === 0)
+            { // TODO: delete the game from the db also after the game ends (when a team clicks on the assasin or finishes it's words)
+                await axios.delete(`${REST_API_BASE_URL}/gameProperties/${currentChatRoomID}`, {
+                    headers: getHeaders()
+                });
+            }
             socketIO.emit('updatingUsersOnlineResponse', usersInRoom.length - 1);
         } catch (error) {
             console.error(error);
@@ -91,16 +105,27 @@ socketIO.on('connection', (socket: SessionSocket) => {
         socketIO.emit('updatingUsersOnlineResponse', users.length);
         socketIO.emit('partsResponse', getChosenParts(await getUsersByChatRoomID(chatRoomID))); // to see the avilable parts in the waiting room (after a user enters the game)
     });
-    socket.on('gameStart', (data: GameProperties) => {        
-        socketIO.emit('updateGamePropertiesResponse', setGameProperties(data));
+    socket.on('gameStart', async (gameStartProperties: GameProperties) => {  
+        const isItFreeToCreateBoardJson = await fetch(`${REST_API_BASE_URL}/gameProperties/${gameStartProperties.chatRoomID}`);
+        const isItFreeToCreateBoard = await isItFreeToCreateBoardJson.json() as GameProperties [];
+        if (isItFreeToCreateBoard.length === 0){
+            try {
+                await axios.post(`${REST_API_BASE_URL}/gameProperties`, gameStartProperties, {
+                    headers: getHeaders()
+                });
+                const gameProperties = await setGameProperties(gameStartProperties)
+                socketIO.emit('updateGamePropertiesResponse', gameProperties);
+            } catch (error) {
+                console.error(error);
+                return { response: false, data: null };
+            }  
+        }
     });
-    socket.on('updateGameProperties', (gameProperties: GameProperties) => {
-        const updatedGameProperties = setGameProperties(gameProperties)
+    socket.on('updateGameProperties', async (gameProperties: GameProperties) => {
+        const updatedGameProperties = await setGameProperties(gameProperties)
         socketIO.emit('updateGamePropertiesResponse', updatedGameProperties);
     });
-    socket.on('showClues', () => {
-        socketIO.emit('updateGamePropertiesResponse', setGameProperties({codeMasterView: !gameProperties.codeMasterView}));
-    });
+
     socket.on("join_room", (chatRoomId: string) => {
         socket.join(chatRoomId);
     });
