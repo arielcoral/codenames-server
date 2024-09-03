@@ -61,7 +61,7 @@ export const getGamePropertiesByChatRoomID = (req: Request, res: Response) => {
         })
         .catch((error) => {
             console.error(error);
-            res.status(500).send({ message: 'An error occurred while fetching the user', error: error.message });
+            res.status(500).send({ message: 'An error occurred while fetching the game properties', error: error.message });
         });
 };
 
