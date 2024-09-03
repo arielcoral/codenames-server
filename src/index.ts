@@ -86,7 +86,7 @@ socketIO.on('connection', (socket: SessionSocket) => {
                 headers: getHeaders()
             });
             if(usersInRoom.length - 1 === 0)
-            {
+            { // TODO: delete the game from the db also after the game ends (when a team clicks on the assasin or finishes it's words)
                 await axios.delete(`${REST_API_BASE_URL}/gameProperties/${currentChatRoomID}`, {
                     headers: getHeaders()
                 });
