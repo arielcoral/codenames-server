@@ -40,7 +40,6 @@ app.use(indexRouter)
 // ----------------------------------------------------------------------------------------------------------------------------
 
 const setGameProperties = async (updatedProperties: GameProperties) => {
-    console.log('@@ entered setGameProperties',)
     const gamePropertiesJson = await fetch(`${REST_API_BASE_URL}/gameProperties/${updatedProperties.chatRoomID}`);
     const gameProperties = await gamePropertiesJson.json() as GameProperties [];
     const updatedGameProperties: GameProperties = { ...gameProperties[0] };
@@ -48,8 +47,7 @@ const setGameProperties = async (updatedProperties: GameProperties) => {
         (updatedGameProperties[key as GamePropertiesKey] as GameProperties)= value as GameProperties; 
     }
     try{
-        console.log('@@ entered try',);
-        axios.patch(`${REST_API_BASE_URL}/gameProperties`, getHeaders())
+        axios.patch(`${REST_API_BASE_URL}/gameProperties`, updatedGameProperties)
     }
     catch(error){
         console.error(error);
@@ -63,7 +61,6 @@ const socketIO = new SocketIOServer(http, {
     }
 });
 
- //let gameProperties: GameProperties = {}
 
 const sessionStore = new InMemorySessionStore();
 socketIO.use(handlesSession(sessionStore));
@@ -118,13 +115,10 @@ socketIO.on('connection', (socket: SessionSocket) => {
         }
     });
     socket.on('updateGameProperties', async (gameProperties: GameProperties) => {
-        console.log('@@ updateGameProperties emit');
         const updatedGameProperties = await setGameProperties(gameProperties)
         socketIO.emit('updateGamePropertiesResponse', updatedGameProperties);
     });
-    // socket.on('showClues', (codeMasterView: boolean, chatRoomID: number) => {
-    //     socketIO.emit('updateGamePropertiesResponse', setGameProperties({codeMasterView: codeMasterView}, chatRoomID));
-    // });
+
     socket.on("join_room", (chatRoomId: string) => {
         socket.join(chatRoomId);
     });
