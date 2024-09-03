@@ -106,9 +106,9 @@ socketIO.on('connection', (socket: SessionSocket) => {
         socketIO.emit('partsResponse', getChosenParts(await getUsersByChatRoomID(chatRoomID))); // to see the avilable parts in the waiting room (after a user enters the game)
     });
     socket.on('gameStart', async (gameStartProperties: GameProperties) => {  
-        const isItFreeToCreateBoardJson = await fetch(`${REST_API_BASE_URL}/gameProperties/${gameStartProperties.chatRoomID}`);
-        const isItFreeToCreateBoard = await isItFreeToCreateBoardJson.json() as GameProperties [];
-        if (isItFreeToCreateBoard.length === 0){
+        const gamesCreatedJson = await fetch(`${REST_API_BASE_URL}/gameProperties/${gameStartProperties.chatRoomID}`);
+        const gamesCreated = await gamesCreatedJson.json() as GameProperties [];
+        if (gamesCreated.length === 0){
             try {
                 await axios.post(`${REST_API_BASE_URL}/gameProperties`, gameStartProperties, {
                     headers: getHeaders()
