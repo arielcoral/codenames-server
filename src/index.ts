@@ -80,10 +80,17 @@ socketIO.on('connection', (socket: SessionSocket) => {
     socket.on('disconnect', async () => {
         console.log('🔥: A user disconnected');
         try {
-            const usersInRoom = (await getUsersByChatRoomID(await getChatRoomIDFromUser(socket.userName as string))) as user []
+            const currentChatRoomID = await getChatRoomIDFromUser(socket.userName as string)
+            const usersInRoom = (await getUsersByChatRoomID(currentChatRoomID)) as user []
             await axios.delete(`${REST_API_BASE_URL}/user/${socket.userName}`, {
                 headers: getHeaders()
             });
+            if(usersInRoom.length - 1 === 0)
+            {
+                await axios.delete(`${REST_API_BASE_URL}/gameProperties/${currentChatRoomID}`, {
+                    headers: getHeaders()
+                });
+            }
             socketIO.emit('updatingUsersOnlineResponse', usersInRoom.length - 1);
         } catch (error) {
             console.error(error);

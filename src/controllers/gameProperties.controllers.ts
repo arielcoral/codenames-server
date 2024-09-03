@@ -65,6 +65,15 @@ export const getGamePropertiesByChatRoomID = (req: Request, res: Response) => {
         });
 };
 
+export const deleteGameAfterFinishing = (req: Request, res: Response) => {
+    const { chatRoomID } = req.params
+    GamePropertiesModel.deleteOne({chatRoomID})
+    .then((user) => {
+    res.send({data: user})
+    })
+    .catch((error) => console.log(error));
+}
+
 export const setGameProperties = (req: Request, res: Response, next: NextFunction) => {
     const {
         chatRoomID,
@@ -87,16 +96,7 @@ export const setGameProperties = (req: Request, res: Response, next: NextFunctio
         secondTeamUnguessedWords,
         gameOver
     } = req.body
-    console.log("firstTeamWords:", firstTeamWords)
-    console.log("firstTeamUnguessedWords:", firstTeamUnguessedWords)
-    console.log("secondTeamWords:", secondTeamWords)
-    console.log("civilianWords:", civilianWords)
-    console.log("assassinWord:", assassinWord)
-    console.log("turn:", turn)
-    console.log("firstTeam:", firstTeam)
-    console.log("secondTeam:", secondTeam)
-    console.log("codeMasterView:", codeMasterView)
-    console.log("guessesRemaining:", guessesRemaining)
+
     const filter = {chatRoomID: chatRoomID}
     const changes = {
         $set: {
