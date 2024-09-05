@@ -13,7 +13,7 @@ import indexRouter from "./routes";
 import mongoose from "mongoose";
 import { REST_API_BASE_URL } from "./utils/constants";
 import axios from "axios";
-import { getUsersByChatRoomID, getHeaders, getChatRoomIDFromUser, getChosenParts } from "./utils/sdk";
+import { getUsersByChatRoomID, getHeaders,  getChosenParts, getUserByUserName } from "./utils/sdk";
 
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
@@ -42,6 +42,9 @@ app.use(indexRouter)
 const setGameProperties = async (updatedProperties: GameProperties) => {
     const gamePropertiesJson = await fetch(`${REST_API_BASE_URL}/gameProperties/${updatedProperties.chatRoomID}`);
     const gameProperties = await gamePropertiesJson.json() as GameProperties [];
+    if(gameProperties.length === 0){
+        console.error('no game properties has been found for chatRoomID:',updatedProperties.chatRoomID)
+    }
     const updatedGameProperties: GameProperties = { ...gameProperties[0] };
     for (const [key, value] of Object.entries(updatedProperties)) {
         (updatedGameProperties[key as GamePropertiesKey] as GameProperties)= value as GameProperties; 
@@ -67,7 +70,6 @@ socketIO.use(handlesSession(sessionStore));
 
 socketIO.on('connection', (socket: SessionSocket) => {
     console.log(`⚡: ${socket.id} user just connected!`);   
-
     sessionStore.saveSession(socket.sessionID as string, {
         userID: socket.userID as string,
         userName: socket.userName as string,
@@ -80,11 +82,12 @@ socketIO.on('connection', (socket: SessionSocket) => {
     socket.on('disconnect', async () => {
         console.log('🔥: A user disconnected');
         try {
-            const currentChatRoomID = await getChatRoomIDFromUser(socket.userName as string)
+            const disconnectedUser = (await getUserByUserName(socket.userName as string))
+            const currentChatRoomID = disconnectedUser.chatRoomID 
             const usersInRoom = (await getUsersByChatRoomID(currentChatRoomID)) as user []
-            await axios.delete(`${REST_API_BASE_URL}/user/${socket.userName}`, {
-                headers: getHeaders()
-            });
+            // await axios.delete(`${REST_API_BASE_URL}/user/${socket.userName}`, {
+            //     headers: getHeaders()
+            // });
             if(usersInRoom.length - 1 === 0)
             { // TODO: delete the game from the db also after the game ends (when a team clicks on the assasin or finishes it's words)
                 await axios.delete(`${REST_API_BASE_URL}/gameProperties/${currentChatRoomID}`, {
@@ -99,9 +102,14 @@ socketIO.on('connection', (socket: SessionSocket) => {
     socket.on('getChosenParts', async (chatRoomID: number) => {
         socketIO.emit('partsResponse', getChosenParts(await getUsersByChatRoomID(chatRoomID))); // to see the avilable parts in the waiting room (after a user enters the game)
     });
-    socket.on('newUser', async (user: user, chatRoomID: number) => {
-        const users = (await getUsersByChatRoomID(chatRoomID)) as user []
+    socket.on('newUser', async (user: user, chatRoomID: number | undefined) => {
+        if(chatRoomID === 0 || chatRoomID === undefined){ // the game is refrehed
+            const us = (await getUserByUserName(user.userName))
+            chatRoomID = us.chatRoomID 
+        }
+        const users = (await getUsersByChatRoomID(chatRoomID)) as user  []
         users.push(user);
+
         socketIO.emit('updatingUsersOnlineResponse', users.length);
         socketIO.emit('partsResponse', getChosenParts(await getUsersByChatRoomID(chatRoomID))); // to see the avilable parts in the waiting room (after a user enters the game)
     });
@@ -121,9 +129,18 @@ socketIO.on('connection', (socket: SessionSocket) => {
             }  
         }
     });
-    socket.on('updateGameProperties', async (gameProperties: GameProperties) => {
-        const updatedGameProperties = await setGameProperties(gameProperties)
-        socketIO.emit('updateGamePropertiesResponse', updatedGameProperties);
+    socket.on('updateGameProperties', async (gameProperties: GameProperties | 'none', userName?: string) => {
+        if(gameProperties !== 'none'){
+            console.log('gameProperties:', gameProperties)
+            const updatedGameProperties = await setGameProperties(gameProperties)
+            socketIO.emit('updateGamePropertiesResponse', updatedGameProperties);
+        }
+        else if(userName){ // when a browser is refreshed
+            const user = (await getUserByUserName(userName))
+            const currentChatRoomID = user.chatRoomID
+            const updatedGameProperties = await setGameProperties({chatRoomID: currentChatRoomID})
+            socketIO.emit('updateGamePropertiesResponse', updatedGameProperties);
+        }
     });
 
     socket.on("join_room", (chatRoomId: string) => {

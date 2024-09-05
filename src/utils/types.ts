@@ -8,6 +8,11 @@ export type user = {
     team: team;
 }
 
+export type userWithSocket = {
+    socketID: string;
+    userName: string;
+}
+
 export type clueObj = {
     clue: string;
     num: number;

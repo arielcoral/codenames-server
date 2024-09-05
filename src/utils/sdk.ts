@@ -16,11 +16,10 @@ export async function getUsersByChatRoomID(chatRoomID: number){
     const fetchedUsers: user []  = (await fetchedUsersJson.json()) as user [] 
     return fetchedUsers
 }
-
-export async function getChatRoomIDFromUser(userName: string): Promise<number> {
-    const res = await fetch(`${REST_API_BASE_URL}/user/userName/${userName}`)
-    const data = await res.json() as {user : user}
-    return data.user.chatRoomID
+export async function getUserByUserName(userName: string){
+    const fetchedUserJson = await fetch(`${REST_API_BASE_URL}/user/userName/${userName}`)
+    const fetchedUser: {user: user}   = (await fetchedUserJson.json()) as {user: user} 
+    return fetchedUser.user
 }
 
 export  function getChosenParts(users: user []): Parts { //TODO: find a better place for this
