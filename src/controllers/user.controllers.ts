@@ -47,6 +47,14 @@ export const deleteUser = (req: Request, res: Response) => {
     })
     .catch((error) => console.log(error));
 }
+export const deleteAllUsersInChatRoon = (req: Request, res: Response) => {
+    const { chatRoomID } = req.params
+    UserModel.deleteMany({chatRoomID})
+    .then((user) => {
+    res.send({data: user})
+    })
+    .catch((error) => console.log(error));
+}
 
 export const SetIsOnline = (req: Request, res: Response, next: NextFunction) => {
     const {
