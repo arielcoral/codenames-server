@@ -16,12 +16,12 @@ export interface GameProperties extends Document {
     codeMasterView?: boolean;
     guessesRemaining?: number;
     allDisable?: boolean;
-    firstTeamScore?: number;
-    secondTeamScore?: number;
+    firstTeamRemainingWords?: number;
+    secondTeamRemainingWords?: number;
     firstTeamClues?: clueObj[];
     secondTeamClues?: clueObj[];
     secondTeamUnguessedWords?: string[];
-    gameOver?: boolean;
+    winner?: 'red' | 'blue' | null;
 }
 
 const cardDataSchema = new Schema<cardData>({
@@ -107,11 +107,11 @@ const gamePropertiesSchema = new Schema<GameProperties>({
         type: Boolean,
         required: false,
     },
-    firstTeamScore: {
+    firstTeamRemainingWords: {
         type: Number,
         required: false,
     },
-    secondTeamScore: {
+    secondTeamRemainingWords: {
         type: Number,
         required: false,
     },
@@ -127,8 +127,9 @@ const gamePropertiesSchema = new Schema<GameProperties>({
         type: [String],
         required: false,
     },
-    gameOver: {
-        type: Boolean,
+    winner: {
+        type: String,
+        enum: ['red', 'blue', null],
         required: false,
     }
 });
