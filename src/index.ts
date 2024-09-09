@@ -84,11 +84,11 @@ socketIO.on('connection', (socket: SessionSocket) => {
         try {
             const disconnectedUser = (await getUserByUserName(socket.userName as string))
             const currentChatRoomID = disconnectedUser.chatRoomID 
-            const onlineUserProperties = {
+            const offlineUserProperties = {
                 isOnline: false,
                 userName: socket.userName as string
             }
-            await axios.patch(`${REST_API_BASE_URL}/user`, onlineUserProperties, {
+            await axios.patch(`${REST_API_BASE_URL}/user`, offlineUserProperties, {
                 headers: getHeaders()
             });
             const usersInRoom = (await getUsersByChatRoomID(currentChatRoomID)) as user []
