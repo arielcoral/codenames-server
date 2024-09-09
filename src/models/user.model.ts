@@ -7,6 +7,7 @@ export interface User extends Document {
     chatRoomID: number;
     role: role;
     team: team;
+    isOnline: boolean;
 }
 
 const UserSchema = new Schema<User>({
@@ -34,6 +35,11 @@ const UserSchema = new Schema<User>({
         required: false,
         minlength: 3,
         maxlength: 4, // eather red or blue
+        unique: false
+    },
+    isOnline: {
+        type: Boolean,
+        required: true,
         unique: false
     }
 });

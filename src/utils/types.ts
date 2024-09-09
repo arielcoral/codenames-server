@@ -6,6 +6,7 @@ export type user = {
     chatRoomID: number;
     role: role;
     team: team;
+    isOnline: boolean;
 }
 
 export type userWithSocket = {
