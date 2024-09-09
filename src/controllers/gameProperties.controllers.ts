@@ -16,12 +16,12 @@ export const createBoard = (req: Request, res: Response) => {
         codeMasterView,
         guessesRemaining,
         allDisable,
-        firstTeamScore,
-        secondTeamScore,
+        firstTeamRemainingWords,
+        secondTeamRemainingWords,
         firstTeamClues,
         secondTeamClues,
         secondTeamUnguessedWords,
-        gameOver
+        winner
     } = req.body
     GamePropertiesModel.create({
         chatRoomID,
@@ -37,12 +37,12 @@ export const createBoard = (req: Request, res: Response) => {
         codeMasterView,
         guessesRemaining,
         allDisable,
-        firstTeamScore,
-        secondTeamScore,
+        firstTeamRemainingWords: firstTeamRemainingWords,
+        secondTeamRemainingWords: secondTeamRemainingWords,
         firstTeamClues,
         secondTeamClues,
         secondTeamUnguessedWords,
-        gameOver
+        winner
     })
         .then((gameBoard) => {
             return res.send({gameBoardID: gameBoard._id});
@@ -89,12 +89,12 @@ export const setGameProperties = (req: Request, res: Response, next: NextFunctio
         codeMasterView,
         guessesRemaining,
         allDisable,
-        firstTeamScore,
-        secondTeamScore,
+        firstTeamRemainingWords,
+        secondTeamRemainingWords,
         firstTeamClues,
         secondTeamClues,
         secondTeamUnguessedWords,
-        gameOver
+        winner
     } = req.body
 
     const filter = {chatRoomID: chatRoomID}
@@ -113,12 +113,12 @@ export const setGameProperties = (req: Request, res: Response, next: NextFunctio
             codeMasterView: codeMasterView,
             guessesRemaining: guessesRemaining,
             allDisable: allDisable,
-            firstTeamScore: firstTeamScore,
-            secondTeamScore: secondTeamScore,
+            firstTeamRemainingWords: firstTeamRemainingWords,
+            secondTeamRemainingWords: secondTeamRemainingWords,
             firstTeamClues: firstTeamClues,
             secondTeamClues: secondTeamClues,
             secondTeamUnguessedWords: secondTeamUnguessedWords,
-            gameOver: gameOver
+            winner: winner
         },
     };
 

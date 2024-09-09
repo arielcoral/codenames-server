@@ -1,9 +1,9 @@
-import { Request, Response} from "express";
+import { NextFunction, Request, Response} from "express";
 import { UserModel } from "../models/user.model";
 
 export const createUser = (req: Request, res: Response) => {
-    const {userName, chatRoomID, role, team} = req.body
-    UserModel.create({userName, chatRoomID, role, team})
+    const {userName, chatRoomID, role, team, isOnline} = req.body
+    UserModel.create({userName, chatRoomID, role, team, isOnline})
         .then((user) => {
             return res.send({userID: user._id});
         })
@@ -46,4 +46,34 @@ export const deleteUser = (req: Request, res: Response) => {
     res.send({data: user})
     })
     .catch((error) => console.log(error));
+}
+export const deleteAllUsersInChatRoon = (req: Request, res: Response) => {
+    const { chatRoomID } = req.params
+    UserModel.deleteMany({chatRoomID})
+    .then((user) => {
+    res.send({data: user})
+    })
+    .catch((error) => console.log(error));
+}
+
+export const SetIsOnline = (req: Request, res: Response, next: NextFunction) => {
+    const {
+        userName,
+        isOnline
+    } = req.body
+    
+    const filter = {userName: userName}
+    const changes = {
+        $set: {
+            isOnline: isOnline
+        },
+    };
+    UserModel.updateOne(filter, changes)
+    .then(() => {
+        return res.send({message: 'Succesfully!'});
+    })
+    .catch((error) => {
+        console.log(error)
+        next(error)
+    });
 }

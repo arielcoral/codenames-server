@@ -13,7 +13,7 @@ import indexRouter from "./routes";
 import mongoose from "mongoose";
 import { REST_API_BASE_URL } from "./utils/constants";
 import axios from "axios";
-import { getUsersByChatRoomID, getHeaders,  getChosenParts, getUserByUserName } from "./utils/sdk";
+import { getUsersByChatRoomID, getHeaders,  getChosenParts, getUserByUserName, checkIfAllUsersAreOffline } from "./utils/sdk";
 
 // mongoose.connect("mongodb+srv://codenames3110:codenames440@codenames.l0w4vhy.mongodb.net/?retryWrites=true&w=majority&appName=codenames")
 
@@ -84,22 +84,32 @@ socketIO.on('connection', (socket: SessionSocket) => {
         try {
             const disconnectedUser = (await getUserByUserName(socket.userName as string))
             const currentChatRoomID = disconnectedUser.chatRoomID 
+            const onlineUserProperties = {
+                isOnline: false,
+                userName: socket.userName as string
+            }
+            await axios.patch(`${REST_API_BASE_URL}/user`, onlineUserProperties, {
+                headers: getHeaders()
+            });
             const usersInRoom = (await getUsersByChatRoomID(currentChatRoomID)) as user []
-            // await axios.delete(`${REST_API_BASE_URL}/user/${socket.userName}`, {
-            //     headers: getHeaders()
-            // });
-            if(usersInRoom.length - 1 === 0)
-            { // TODO: delete the game from the db also after the game ends (when a team clicks on the assasin or finishes it's words)
+            if(checkIfAllUsersAreOffline(usersInRoom))
+            {
                 await axios.delete(`${REST_API_BASE_URL}/gameProperties/${currentChatRoomID}`, {
                     headers: getHeaders()
                 });
+                await axios.delete(`${REST_API_BASE_URL}/user/room/${currentChatRoomID}`, {
+                    headers: getHeaders()
+                });
             }
-            socketIO.emit('updatingUsersOnlineResponse', usersInRoom.length - 1);
+            socketIO.emit('updatingUsersResponse', usersInRoom);
         } catch (error) {
             console.error(error);
         }  
     });
     socket.on('getChosenParts', async (chatRoomID: number) => {
+        const users = (await getUsersByChatRoomID(chatRoomID)) as user  []
+        
+        socketIO.emit('updatingUsersResponse', users);
         socketIO.emit('partsResponse', getChosenParts(await getUsersByChatRoomID(chatRoomID))); // to see the avilable parts in the waiting room (after a user enters the game)
     });
     socket.on('newUser', async (user: user, chatRoomID: number | undefined) => {
@@ -107,10 +117,16 @@ socketIO.on('connection', (socket: SessionSocket) => {
             const us = (await getUserByUserName(user.userName))
             chatRoomID = us.chatRoomID 
         }
+        const onlineUserProperties = {
+            isOnline: true,
+            userName: user.userName
+        }
+        await axios.patch(`${REST_API_BASE_URL}/user`, onlineUserProperties, {
+            headers: getHeaders()
+        });
         const users = (await getUsersByChatRoomID(chatRoomID)) as user  []
-        users.push(user);
-
-        socketIO.emit('updatingUsersOnlineResponse', users.length);
+        
+        socketIO.emit('updatingUsersResponse', users);
         socketIO.emit('partsResponse', getChosenParts(await getUsersByChatRoomID(chatRoomID))); // to see the avilable parts in the waiting room (after a user enters the game)
     });
     socket.on('gameStart', async (gameStartProperties: GameProperties) => {  
@@ -131,7 +147,6 @@ socketIO.on('connection', (socket: SessionSocket) => {
     });
     socket.on('updateGameProperties', async (gameProperties: GameProperties | 'none', userName?: string) => {
         if(gameProperties !== 'none'){
-            console.log('gameProperties:', gameProperties)
             const updatedGameProperties = await setGameProperties(gameProperties)
             socketIO.emit('updateGamePropertiesResponse', updatedGameProperties);
         }

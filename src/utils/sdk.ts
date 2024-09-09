@@ -41,3 +41,11 @@ export  function getChosenParts(users: user []): Parts { //TODO: find a better p
     })
     return chosenParts
 }
+
+export function checkIfAllUsersAreOffline(users: user []){
+    for(const user of users){
+        if(user.isOnline)
+            return false
+    }
+    return true
+}
