@@ -9,6 +9,7 @@ export interface GameProperties extends Document {
     firstTeamUnguessedWords?: string[];
     secondTeamWords?: string[];
     civilianWords?: string[];
+    civilianUnguessedWords?: string[];
     assassinWord?: string[];
     turn?: team;
     firstTeam?: team;
@@ -73,6 +74,10 @@ const gamePropertiesSchema = new Schema<GameProperties>({
         required: false,
     },
     civilianWords: {
+        type: [String],
+        required: false,
+    },
+    civilianUnguessedWords: {
         type: [String],
         required: false,
     },

@@ -7,9 +7,10 @@ app.use(cors());
 
 import indexRouter from "./routes";
 import mongoose from "mongoose";
+import { MONGO_DB_URI, PORT } from "./utils/constants";
 
 mongoose
-.connect('mongodb://localhost:27017/codenames')
+.connect(MONGO_DB_URI as string)
 .then(() => {
     console.log('Successfully connected to MongoDB');
 })
@@ -20,6 +21,6 @@ mongoose
 
 app.use(indexRouter)
 
-app.listen(3001, () => {
-    console.log("server is running on port 3001")
+app.listen(PORT, () => {
+    console.log(`server is running on port ${PORT}`)
 })
