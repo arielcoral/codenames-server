@@ -3,7 +3,7 @@ import { GamePropertiesModel } from "../models/gameProperties.model"; '../models
 
 export const createBoard = (req: Request, res: Response) => {
     const {
-        chatRoomID,
+        chatRoom,
         gameArray,
         firstTeamWords,
         firstTeamUnguessedWords,
@@ -25,7 +25,7 @@ export const createBoard = (req: Request, res: Response) => {
         winner
     } = req.body
     GamePropertiesModel.create({
-        chatRoomID,
+        chatRoom,
         gameArray,
         firstTeamWords,
         firstTeamUnguessedWords,
@@ -52,9 +52,9 @@ export const createBoard = (req: Request, res: Response) => {
         .catch(err => console.error(err.message))
 }
 
-export const getGamePropertiesByChatRoomID = (req: Request, res: Response) => {
-    const { chatRoomID } = req.params;
-    GamePropertiesModel.find({ chatRoomID })
+export const getGamePropertiesByChatRoom = (req: Request, res: Response) => {
+    const { chatRoom } = req.params;
+    GamePropertiesModel.find({ chatRoom })
         .then((gameProperties) => {
             if (!gameProperties) {
                 return res.status(200).send([]);
@@ -68,8 +68,8 @@ export const getGamePropertiesByChatRoomID = (req: Request, res: Response) => {
 };
 
 export const deleteGameAfterFinishing = (req: Request, res: Response) => {
-    const { chatRoomID } = req.params
-    GamePropertiesModel.deleteOne({chatRoomID})
+    const { chatRoom } = req.params
+    GamePropertiesModel.deleteOne({chatRoom})
     .then((user) => {
     res.send({data: user})
     })
@@ -78,7 +78,7 @@ export const deleteGameAfterFinishing = (req: Request, res: Response) => {
 
 export const setGameProperties = (req: Request, res: Response, next: NextFunction) => {
     const {
-        chatRoomID,
+        chatRoom,
         gameArray,
         firstTeamWords,
         firstTeamUnguessedWords,
@@ -100,10 +100,10 @@ export const setGameProperties = (req: Request, res: Response, next: NextFunctio
         winner
     } = req.body
 
-    const filter = {chatRoomID: chatRoomID}
+    const filter = {chatRoom: chatRoom}
     const changes = {
         $set: {
-            chatRoomID: chatRoomID,
+            chatRoom: chatRoom,
             gameArray: gameArray,
             firstTeamWords: firstTeamWords,
             firstTeamUnguessedWords: firstTeamUnguessedWords,
