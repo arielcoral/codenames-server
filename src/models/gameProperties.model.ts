@@ -3,7 +3,7 @@ import { cardData, clueObj, team } from "../utils/types";
 
 export interface GameProperties extends Document {
     id: string;
-    chatRoomID?: number;
+    chatRoom?: string;
     gameArray?: cardData[][];
     firstTeamWords?: string[];
     firstTeamUnguessedWords?: string[];
@@ -53,8 +53,8 @@ const clueObjSchema = new Schema<clueObj>({
 });
 
 const gamePropertiesSchema = new Schema<GameProperties>({
-    chatRoomID: {
-        type: Number,
+    chatRoom: {
+        type: String,
         required: false,
     },
     gameArray: {
