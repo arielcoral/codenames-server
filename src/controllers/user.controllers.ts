@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response} from "express";
 import { UserModel } from "../models/user.model";
+import { compare } from "bcrypt";
 
 export const createUser = (req: Request, res: Response) => {
-    const {userName, chatRoom, role, team, isOnline} = req.body
-    UserModel.create({userName, chatRoom, role, team, isOnline})
+    const {userName, chatRoom, isOnline} = req.body
+    UserModel.create({userName, chatRoom, isOnline})
         .then((user) => {
             return res.send({userID: user._id});
         })
@@ -56,6 +57,29 @@ export const deleteAllUsersInChatRoon = (req: Request, res: Response) => {
     .catch((error) => console.log(error));
 }
 
+export const SetUserProperties = (req: Request, res: Response, next: NextFunction) => {
+    const {
+        userName,
+        role,
+        team
+    } = req.body
+    console.log(userName, role, team)
+    const filter = {userName: userName}
+    const changes = {
+        $set: {
+            role: role,
+            team: team
+        },
+    };
+    UserModel.updateOne(filter, changes)
+    .then(() => {
+        return res.send({message: 'Succesfully!'});
+    })
+    .catch((error) => {
+        console.log(error)
+        next(error)
+    });
+}
 export const SetIsOnline = (req: Request, res: Response, next: NextFunction) => {
     const {
         userName,

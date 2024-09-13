@@ -25,7 +25,7 @@ const UserSchema = new Schema<User>({
     },
     role: {
         type: String,
-        required: true,
+        required: false,
         minlength: 5,
         maxlength: 11, // eather player or code-master
         unique: false
