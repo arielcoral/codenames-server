@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response} from "express";
 import { UserModel } from "../models/user.model";
-import { compare } from "bcrypt";
 
 export const createUser = (req: Request, res: Response) => {
     const {userName, chatRoom, isOnline} = req.body
@@ -63,7 +62,6 @@ export const SetUserProperties = (req: Request, res: Response, next: NextFunctio
         role,
         team
     } = req.body
-    console.log(userName, role, team)
     const filter = {userName: userName}
     const changes = {
         $set: {
