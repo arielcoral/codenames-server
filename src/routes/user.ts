@@ -9,6 +9,6 @@ userRouter.get('/userName/:userName', celebrate(noBodySchema), getUserByUserName
 userRouter.get('/chatRoom/:chatRoom', celebrate(noBodySchema), getUserByChatRoom)
 userRouter.delete('/:userName', celebrate(noBodySchema), deleteUser)
 userRouter.delete('/room/:chatRoom', celebrate(noBodySchema), deleteAllUsersInChatRoon)
-userRouter.patch('/online', celebrate(setIsOnlineSchema) ,SetIsOnline)
+userRouter.patch('/online', celebrate(setIsOnlineSchema), SetIsOnline)
 userRouter.patch('/', celebrate(setUserPropertiesSchema), SetUserProperties)
 export default userRouter; 

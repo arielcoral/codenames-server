@@ -18,8 +18,8 @@ export const setUserPropertiesSchema  = {
     }),
 };
 export const setIsOnlineSchema  = {
-    body: Joi.object({
-        userName: Joi.string().required(),
-        isOnline: Joi.boolean().required()
+    body: Joi.object({ // the properties are optional because sometimes empty requests are sent
+        userName: Joi.string().optional(),
+        isOnline: Joi.boolean().optional()
     }),
 };
