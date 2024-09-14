@@ -1,12 +1,14 @@
 import { Router} from "express";
 import { createUser, deleteAllUsersInChatRoon, deleteUser, getUserByChatRoom, getUserByUserName, SetIsOnline, SetUserProperties } from '../controllers/user.controllers'
+import { createUserSchema, noBodySchema, setIsOnlineSchema, setUserPropertiesSchema } from "../middlewares/user.schema";
+import { celebrate } from "celebrate";
 
 const userRouter: Router = Router();
-userRouter.post('/', createUser)
-userRouter.get('/userName/:userName', getUserByUserName)
-userRouter.get('/chatRoom/:chatRoom', getUserByChatRoom)
-userRouter.delete('/:userName', deleteUser)
-userRouter.delete('/room/:chatRoom', deleteAllUsersInChatRoon)
-userRouter.patch('/online', SetIsOnline)
-userRouter.patch('/', SetUserProperties)
+userRouter.post('/', celebrate(createUserSchema) ,createUser)
+userRouter.get('/userName/:userName', celebrate(noBodySchema), getUserByUserName)
+userRouter.get('/chatRoom/:chatRoom', celebrate(noBodySchema), getUserByChatRoom)
+userRouter.delete('/:userName', celebrate(noBodySchema), deleteUser)
+userRouter.delete('/room/:chatRoom', celebrate(noBodySchema), deleteAllUsersInChatRoon)
+userRouter.patch('/online', celebrate(setIsOnlineSchema) ,SetIsOnline)
+userRouter.patch('/', celebrate(setUserPropertiesSchema), SetUserProperties)
 export default userRouter; 
