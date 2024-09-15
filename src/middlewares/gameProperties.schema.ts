@@ -36,7 +36,7 @@ export const createGamePropertiesSchema = {
                     num: Joi.number().required(),
                 })
             )
-            .required(),
+            .min(0),
         secondTeamClues: Joi.array()
             .items(
                 Joi.object({
@@ -44,7 +44,7 @@ export const createGamePropertiesSchema = {
                     num: Joi.number().required(),
                 })
             )
-            .required(),
+            .min(0),
         secondTeamUnguessedWords: Joi.array().items(Joi.string()).required(),
         winner: Joi.string().valid('red', 'blue', null).required(),
         __v: Joi.number().optional()
