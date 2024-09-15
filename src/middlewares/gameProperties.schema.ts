@@ -2,8 +2,7 @@ import { Joi } from 'celebrate';
 
 export const createGamePropertiesSchema = {
     body: Joi.object({
-        _id: Joi.string().required(),
-        chatRoom: Joi.string().optional(),
+        chatRoom: Joi.string().required(),
         gameArray: Joi.array()
             .items(
                 Joi.array().items(
@@ -47,12 +46,10 @@ export const createGamePropertiesSchema = {
             .min(0),
         secondTeamUnguessedWords: Joi.array().items(Joi.string()).required(),
         winner: Joi.string().valid('red', 'blue', null).required(),
-        __v: Joi.number().optional()
         }),
 };
 export const setGamePropertiesSchema = {
     body: Joi.object({
-        _id: Joi.string().required(),
         chatRoom: Joi.string().optional(),
         gameArray: Joi.array()
             .items(
@@ -86,7 +83,7 @@ export const setGamePropertiesSchema = {
                     num: Joi.number().required(),
                 })
             )
-            .optional(),
+            .min(0),
         secondTeamClues: Joi.array()
             .items(
                 Joi.object({
@@ -94,10 +91,9 @@ export const setGamePropertiesSchema = {
                     num: Joi.number().required(),
                 })
             )
-            .optional(),
+            .min(0),
         secondTeamUnguessedWords: Joi.array().items(Joi.string()).optional(),
         winner: Joi.string().valid('red', 'blue', null).optional(),
-        __v: Joi.number().optional()
         }),
 };
 export const noBodySchema = {

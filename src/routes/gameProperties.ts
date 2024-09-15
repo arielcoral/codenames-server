@@ -9,6 +9,6 @@ const gamePropertiesRouter: Router = Router();
 gamePropertiesRouter.post('/', celebrate(createGamePropertiesSchema), createBoard)
 gamePropertiesRouter.get('/:chatRoom', celebrate(noBodySchema), getGamePropertiesByChatRoom)
 gamePropertiesRouter.delete('/:chatRoom', celebrate(noBodySchema), deleteGameAfterFinishing)
-gamePropertiesRouter.patch('/', /*celebrate(setGamePropertiesSchema),*/ setGameProperties)
+gamePropertiesRouter.patch('/', celebrate(setGamePropertiesSchema), setGameProperties)
 
 export default gamePropertiesRouter; 
