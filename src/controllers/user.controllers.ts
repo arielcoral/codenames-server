@@ -24,7 +24,7 @@ export const getUserByUserName = (req: Request, res: Response) => {
             res.status(500).send({ message: 'An error occurred while fetching the user', error: error.message });
         });
 };
-export const getUserByChatRoom = (req: Request, res: Response) => {
+export const getUsersByChatRoom = (req: Request, res: Response) => {
     const { chatRoom } = req.params;
     UserModel.find({ chatRoom })
         .then((users) => {
