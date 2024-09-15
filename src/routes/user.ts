@@ -9,4 +9,4 @@ userRouter.delete('/:userName', deleteUser)
 userRouter.delete('/room/:chatRoom', deleteAllUsersInChatRoon)
 userRouter.patch('/online', SetIsOnline)
 userRouter.patch('/', SetUserProperties)
-export default userRouter; 
+export default userRouter;
