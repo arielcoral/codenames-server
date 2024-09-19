@@ -23,6 +23,7 @@ export interface GameProperties extends Document {
     secondTeamClues?: clueObj[];
     secondTeamUnguessedWords?: string[];
     winner?: 'red' | 'blue' | null;
+    createdAt: Date;
 }
 
 const cardDataSchema = new Schema<cardData>({
@@ -136,6 +137,11 @@ const gamePropertiesSchema = new Schema<GameProperties>({
         type: String,
         enum: ['red', 'blue', null],
         required: false,
+    },
+    createdAt: {
+        type: Date,
+        required: true,
+        unique: false
     }
 });
 

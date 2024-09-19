@@ -2,8 +2,8 @@ import { NextFunction, Request, Response} from "express";
 import { UserModel } from "../models/user.model";
 
 export const createUser = (req: Request, res: Response) => {
-    const {userName, chatRoom, isOnline} = req.body
-    UserModel.create({userName, chatRoom, isOnline})
+    const {userName, chatRoom, isOnline, createdAt} = req.body
+    UserModel.create({userName, chatRoom, isOnline, createdAt})
         .then((user) => {
             return res.send({userID: user._id});
         })
@@ -98,4 +98,14 @@ export const SetIsOnline = (req: Request, res: Response, next: NextFunction) => 
         console.log(error)
         next(error)
     });
+}
+
+export const  deleteOldUsers = () => {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+    UserModel.deleteMany({ createdAt: { $lt: oneHourAgo } })
+    .then((data) => {
+    console.log({data: data})
+    })
+    .catch((error) => console.log(error));
 }

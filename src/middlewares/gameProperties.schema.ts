@@ -46,18 +46,20 @@ export const createGamePropertiesSchema = {
             .min(0),
         secondTeamUnguessedWords: Joi.array().items(Joi.string()).required(),
         winner: Joi.string().valid('red', 'blue', null).required(),
+        createdAt: Joi.date().required()
         }),
 };
 export const setGamePropertiesSchema = {
     body: Joi.object({
+        _id: Joi.string().optional(),
         chatRoom: Joi.string().optional(),
         gameArray: Joi.array()
             .items(
                 Joi.array().items(
                     Joi.object({
-                        word: Joi.string().required(),
-                        team: Joi.string().valid('red', 'blue', 'assassin', 'civilian').required(),
-                        clicked: Joi.boolean().required(),
+                        word: Joi.string().optional(),
+                        team: Joi.string().valid('red', 'blue', 'assassin', 'civilian').optional(),
+                        clicked: Joi.boolean().optional(),
                     })
                 )
             )
@@ -79,21 +81,23 @@ export const setGamePropertiesSchema = {
         firstTeamClues: Joi.array()
             .items(
                 Joi.object({
-                    clue: Joi.string().required(),
-                    num: Joi.number().required(),
+                    clue: Joi.string().optional(),
+                    num: Joi.number().optional(),
+                    _id: Joi.string().optional()
                 })
             )
-            .min(0),
+            .min(0).optional(),
         secondTeamClues: Joi.array()
             .items(
                 Joi.object({
-                    clue: Joi.string().required(),
-                    num: Joi.number().required(),
+                    clue: Joi.string().optional(),
+                    num: Joi.number().optional(),
                 })
             )
-            .min(0),
+            .min(0).optional(),
         secondTeamUnguessedWords: Joi.array().items(Joi.string()).optional(),
         winner: Joi.string().valid('red', 'blue', null).optional(),
+        __v: Joi.number().optional()
         }),
 };
 export const noBodySchema = {

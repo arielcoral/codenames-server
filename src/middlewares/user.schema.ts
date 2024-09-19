@@ -4,7 +4,8 @@ export const createUserSchema = {
     body: Joi.object({
         userName: Joi.string().required(),
         chatRoom: Joi.string().required(),
-        isOnline: Joi.boolean().required()
+        isOnline: Joi.boolean().required(),
+        createdAt: Joi.date().required()
     }),
 };
 export const noBodySchema = {
