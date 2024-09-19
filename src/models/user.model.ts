@@ -8,6 +8,7 @@ export interface User extends Document {
     role: role;
     team: team;
     isOnline: boolean;
+    createdAt: Date;
 }
 
 const UserSchema = new Schema<User>({
@@ -39,6 +40,11 @@ const UserSchema = new Schema<User>({
     },
     isOnline: {
         type: Boolean,
+        required: true,
+        unique: false
+    },
+    createdAt: {
+        type: Date,
         required: true,
         unique: false
     }
