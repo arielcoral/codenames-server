@@ -22,7 +22,8 @@ export const createBoard = (req: Request, res: Response) => {
         firstTeamClues,
         secondTeamClues,
         secondTeamUnguessedWords,
-        winner
+        winner,
+        createdAt
     } = req.body
     GamePropertiesModel.create({
         chatRoom,
@@ -44,7 +45,8 @@ export const createBoard = (req: Request, res: Response) => {
         firstTeamClues,
         secondTeamClues,
         secondTeamUnguessedWords,
-        winner
+        winner,
+        createdAt
     })
         .then((gameBoard) => {
             return res.send({gameBoardID: gameBoard._id});
@@ -134,4 +136,14 @@ export const setGameProperties = (req: Request, res: Response, next: NextFunctio
         console.log(error)
         next(error)
     });
+}
+
+export const  deleteOldGames = () => {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+    GamePropertiesModel.deleteMany({ createdAt: { $lt: oneHourAgo } })
+    .then((data) => {
+    console.log({data: data})
+    })
+    .catch((error) => console.log(error));
 }
