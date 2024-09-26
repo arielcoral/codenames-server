@@ -24,7 +24,7 @@ mongoose
 setInterval(async () => {
     deleteOldUsers();
     deleteOldGames();
-}, 60 * 60 * 1000); // every 5 minutes
+}, 5 * 60 * 1000); // every 5 minutes
 
 app.use(indexRouter)
 
